@@ -1,4 +1,44 @@
+# ── Environment & secrets ─────────────────────────────────────────────────
 .env
+.env.*
+.env.local
+.env.*.local
+*.env
+
+# ── MCP / Claude config with credentials ─────────────────────────────────
 .mcp.json
+.claude/settings.local.json
+
+# ── Private keys & certificates ──────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+id_rsa
+id_ed25519
+id_ecdsa
+id_dsa
+*.ppk
+
+# ── Cloud / service credentials ──────────────────────────────────────────
+.aws/
+.gcloud/
+serviceAccountKey.json
+*-service-account.json
+firebase-adminsdk*.json
+google-credentials.json
+
+# ── Dependencies ──────────────────────────────────────────────────────────
 node_modules/
+
+# ── OS artefacts ─────────────────────────────────────────────────────────
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Editor artefacts ─────────────────────────────────────────────────────
+.vscode/settings.json
+*.swp
+*.swo
