@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SG LeadGen — Singapore Lead Generator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* ── THEMES ─────────────────────────────────────────────────────────────── */
+:root{
+  --bg:#0f172a;
+  --surface:#1e293b;
+  --surface2:#273549;
+  --surface3:#334155;
+  --accent:#6366f1;
+  --accent-h:#4f46e5;
+  --accent-light:rgba(99,102,241,.15);
+  --text:#f1f5f9;
+  --text-muted:#94a3b8;
+  --text-dim:#64748b;
+  --border:#334155;
+  --border-light:#1e293b;
+  --success:#22c55e;
+  --success-bg:rgba(34,197,94,.12);
+  --error:#ef4444;
+  --error-bg:rgba(239,68,68,.12);
+  --warning:#f59e0b;
+  --warning-bg:rgba(245,158,11,.12);
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --radius:10px;
+  --radius-sm:6px;
+}
+[data-theme="light"]{
+  --bg:#f8fafc;
+  --surface:#ffffff;
+  --surface2:#f1f5f9;
+  --surface3:#e2e8f0;
+  --text:#0f172a;
+  --text-muted:#475569;
+  --text-dim:#94a3b8;
+  --border:#e2e8f0;
+  --border-light:#f1f5f9;
+  --success-bg:rgba(34,197,94,.1);
+  --error-bg:rgba(239,68,68,.1);
+  --warning-bg:rgba(245,158,11,.1);
+  --shadow:0 4px 24px rgba(0,0,0,.08);
+}
+
+/* ── BASE ───────────────────────────────────────────────────────────────── */
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background .2s,color .2s}
+
+/* ── NAVBAR ─────────────────────────────────────────────────────────────── */
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:60px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.1rem;text-decoration:none;color:var(--text)}
+.brand-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.brand-sub{font-size:.68rem;font-weight:400;color:var(--text-muted);margin-left:2px;white-space:nowrap}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-badge{background:var(--success-bg);color:var(--success);border:1px solid var(--success);border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:600;white-space:nowrap}
+
+/* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+.app{display:flex;flex:1;height:calc(100vh - 60px);overflow:hidden}
+.sidebar{width:300px;min-width:300px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── SIDEBAR SECTIONS ───────────────────────────────────────────────────── */
+.sidebar-section{padding:18px 20px;border-bottom:1px solid var(--border)}
+.section-title{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px}
+
+/* ── FORM FIELDS ────────────────────────────────────────────────────────── */
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:.8rem;font-weight:500;color:var(--text-muted);margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-size:.86rem;padding:8px 11px;outline:none;transition:border-color .2s,background .2s
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);background:var(--surface3)}
+.field select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.field select option{background:var(--surface)}
+.hint{font-size:.72rem;color:var(--text-dim);margin-top:4px;line-height:1.5}
+
+/* custom sector wrapper: select + free text */
+.sector-row{display:flex;gap:6px}
+.sector-row select{flex:1}
+.sector-row input{flex:1;display:none}
+.sector-row.custom input{display:block}
+.sector-row.custom select{display:none}
+
+/* ── TAG INPUT ──────────────────────────────────────────────────────────── */
+.tag-wrapper{
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:5px 8px;display:flex;flex-wrap:wrap;gap:5px;cursor:text;min-height:38px;
+  transition:border-color .2s,background .2s
+}
+.tag-wrapper:focus-within{border-color:var(--accent)}
+.tag{
+  display:inline-flex;align-items:center;gap:3px;background:var(--accent-light);
+  border:1px solid rgba(99,102,241,.4);border-radius:20px;padding:2px 9px;
+  font-size:.76rem;color:var(--accent);white-space:nowrap
+}
+.tag-x{cursor:pointer;opacity:.65;font-size:.95rem;line-height:1;margin-left:1px;padding:0 2px}
+.tag-x:hover{opacity:1}
+.tag-input{background:transparent;border:none;outline:none;color:var(--text);font-size:.84rem;flex:1;min-width:80px;padding:2px 4px}
+.tag-input::placeholder{color:var(--text-dim)}
+
+/* ── RANGE ──────────────────────────────────────────────────────────────── */
+.range-row{display:flex;align-items:center;gap:10px}
+.range-row input[type=range]{flex:1;accent-color:var(--accent);height:4px}
+.range-val{font-size:.85rem;color:var(--accent);font-weight:700;min-width:32px;text-align:right}
+
+/* ── BUTTONS ────────────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--radius-sm);font-size:.84rem;font-weight:500;cursor:pointer;transition:all .2s;padding:9px 16px;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--accent-h);transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.4)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-sm{padding:6px 12px;font-size:.78rem}
+.btn-xs{padding:4px 10px;font-size:.75rem}
+.btn-icon{padding:8px;border-radius:var(--radius-sm)}
+.btn-full{width:100%}
+.btn-success{background:var(--success-bg);color:var(--success);border:1px solid rgba(34,197,94,.3)}
+.btn-success:hover{background:var(--success);color:#fff}
+.action-row{display:flex;gap:8px;padding-top:4px}
+
+/* ── STATS ──────────────────────────────────────────────────────────────── */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-card{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border)}
+.stat-num{font-size:1.5rem;font-weight:800;color:var(--accent);line-height:1}
+.stat-lbl{font-size:.7rem;color:var(--text-muted);margin-top:3px}
+.export-row{display:flex;gap:6px;margin-top:10px}
+
+/* ── MAIN / CONTENT ─────────────────────────────────────────────────────── */
+.content{flex:1;overflow:auto;padding:24px}
+
+/* ── EMPTY STATE ────────────────────────────────────────────────────────── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--text-dim);text-align:center;padding:32px}
+.empty-icon{font-size:4rem;opacity:.35}
+.empty-state h3{font-size:1.1rem;font-weight:600;color:var(--text-muted)}
+.empty-state p{font-size:.84rem;max-width:360px;line-height:1.7;color:var(--text-dim)}
+.quick-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px}
+.quick-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.78rem;cursor:pointer;transition:all .2s;color:var(--text-muted)}
+.quick-chip:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+
+/* ── PROGRESS ───────────────────────────────────────────────────────────── */
+.progress-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;height:100%;text-align:center;padding:32px}
+.steps{display:flex;align-items:flex-start;gap:0}
+.step{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:88px}
+.step-dot{width:30px;height:30px;border-radius:50%;background:var(--surface3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--text-dim);transition:all .35s}
+.step-dot.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 4px var(--accent-light)}
+.step-dot.done{background:var(--success);border-color:var(--success);color:#fff}
+.step-connector{width:48px;height:2px;background:var(--border);margin-top:14px;transition:background .35s}
+.step-connector.done{background:var(--success)}
+.step-lbl{font-size:.7rem;color:var(--text-dim);font-weight:500}
+.step.active .step-lbl{color:var(--accent)}
+.step.done .step-lbl{color:var(--success)}
+.spinner{width:44px;height:44px;border:3px solid var(--surface3);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress-msg{font-size:.95rem;font-weight:500;color:var(--text-muted)}
+.progress-detail{font-size:.78rem;color:var(--text-dim);max-width:420px}
+
+/* ── RESULTS ────────────────────────────────────────────────────────────── */
+.results-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.results-title{font-size:1rem;font-weight:700;flex:1}
+.results-count{color:var(--text-dim);font-weight:400;font-size:.85rem;margin-left:6px}
+.search-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:.83rem;padding:7px 12px;outline:none;width:200px;transition:border-color .2s}
+.search-box:focus{border-color:var(--accent)}
+
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead th{
+  background:var(--surface2);padding:10px 14px;text-align:left;
+  font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-muted);white-space:nowrap;border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none;position:sticky;top:0;transition:background .15s
+}
+thead th:hover{background:var(--surface3)}
+.th-inner{display:flex;align-items:center;gap:4px}
+.sort-icon{opacity:.4;font-size:.8rem}
+thead th.asc .sort-icon::after{content:'↑';opacity:1}
+thead th.desc .sort-icon::after{content:'↓';opacity:1}
+thead th:not(.asc):not(.desc) .sort-icon::after{content:'↕'}
+tbody tr{border-bottom:1px solid var(--border-light);transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--surface2)}
+td{padding:9px 14px;vertical-align:middle;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.nowrap{white-space:nowrap}
+.no-data{color:var(--text-dim)}
+.cell-name{font-weight:600;color:var(--text)}
+.cell-addr{font-size:.78rem;color:var(--text-muted)}
+
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:600}
+.badge-green{background:var(--success-bg);color:var(--success)}
+.badge-blue{background:var(--accent-light);color:var(--accent)}
+.badge-yellow{background:var(--warning-bg);color:var(--warning)}
+.badge-gray{background:var(--surface3);color:var(--text-muted)}
+
+.copy-btn{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:.8rem;padding:1px 4px;border-radius:3px;opacity:.45;transition:opacity .15s;vertical-align:middle}
+.copy-btn:hover{opacity:1;color:var(--accent)}
+td a{color:var(--accent);text-decoration:none;font-size:.8rem}
+td a:hover{text-decoration:underline}
+
+/* ── MODAL ──────────────────────────────────────────────────────────────── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)}
+.modal-hdr h2{font-size:.95rem;font-weight:700}
+.modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.modal-ftr{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+.key-wrap{position:relative}
+.key-wrap input{padding-right:38px}
+.key-eye{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.85rem;padding:2px}
+.key-eye:hover{color:var(--text)}
+
+.divider{height:1px;background:var(--border);margin:4px 0}
+
+/* ── TOAST ──────────────────────────────────────────────────────────────── */
+.toasts{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:7px;z-index:999}
+.toast{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:10px 16px;font-size:.83rem;display:flex;align-items:center;gap:9px;
+  box-shadow:0 8px 28px rgba(0,0,0,.35);animation:tIn .22s ease;max-width:320px
+}
+.toast.success{border-left:3px solid var(--success)}
+.toast.error{border-left:3px solid var(--error)}
+.toast.info{border-left:3px solid var(--accent)}
+@keyframes tIn{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── SCROLLBAR ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media(max-width:780px){
+  .sidebar{width:100%;min-width:0;max-height:55vh;border-right:none;border-bottom:1px solid var(--border)}
+  .app{flex-direction:column;height:auto}
+  .main{min-height:50vh}
+  .brand-sub{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="brand">
+    <div class="brand-icon">🇸🇬</div>
+    SG LeadGen
+    <span class="brand-sub">Singapore Business Leads · Apify</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge" id="liveCount" style="display:none">0 leads</span>
+    <button class="btn btn-ghost btn-sm" id="clearBtn" style="display:none" onclick="clearResults()">Clear</button>
+    <button class="btn btn-ghost btn-icon" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="btn btn-ghost btn-icon" onclick="openSettings()" title="Settings">⚙️</button>
+  </div>
+</nav>
+
+<!-- ── APP ───────────────────────────────────────────────────────────────── -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- SEARCH -->
+    <div class="sidebar-section">
+      <div class="section-title">Search Criteria</div>
+
+      <div class="field">
+        <label>Industry / Sector</label>
+        <div class="sector-row" id="sectorRow">
+          <select id="sectorSelect" onchange="onSectorChange(this)">
+            <option value="">— Select sector —</option>
+            <option>Technology & IT</option>
+            <option>Finance & Banking</option>
+            <option>Healthcare & Medical</option>
+            <option>Logistics & Supply Chain</option>
+            <option>Food & Beverage</option>
+            <option>Manufacturing</option>
+            <option>Real Estate & Property</option>
+            <option>Legal & Professional Services</option>
+            <option>Education & Training</option>
+            <option>Marketing & Advertising</option>
+            <option>Retail</option>
+            <option>Hospitality & Tourism</option>
+            <option>Construction & Engineering</option>
+            <option>Media & Entertainment</option>
+            <option value="__custom__">+ Custom sector…</option>
+          </select>
+          <input type="text" id="sectorCustom" placeholder="Enter sector name…" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Job Title Keywords <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
+        <div class="tag-wrapper" id="tagWrapper" onclick="document.getElementById('tagIn').focus()">
+          <input type="text" id="tagIn" class="tag-input" placeholder="CEO, CTO, Director…" />
+        </div>
+        <div class="hint">Press Enter or comma to add. Used to refine search queries.</div>
+      </div>
+
+      <div class="field">
+        <label>Target Group</label>
+        <select id="targetGroup">
+          <option value="">All Businesses</option>
+          <option>SME</option>
+          <option>MNC</option>
+          <option>Startup</option>
+          <option>GLC</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Singapore Region</label>
+        <select id="region">
+          <option value="">All Singapore</option>
+          <option>Central</option>
+          <option>East</option>
+          <option>West</option>
+          <option>North</option>
+          <option>North-East</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Max Results per Query</label>
+        <div class="range-row">
+          <input type="range" id="maxResults" min="10" max="200" step="10" value="50"
+            oninput="document.getElementById('maxVal').textContent=this.value">
+          <span class="range-val" id="maxVal">50</span>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-primary btn-full" id="searchBtn" onclick="startSearch()">
+          🔍 Find Leads
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="sidebar-section" id="statsPanel" style="display:none">
+      <div class="section-title">Results Summary</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="sTot">0</div>
+          <div class="stat-lbl">Total Leads</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="sPhone">0</div>
+          <div class="stat-lbl">With Phone</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="sEmail">0</div>
+          <div class="stat-lbl">With Email</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="sWeb">0</div>
+          <div class="stat-lbl">With Website</div>
+        </div>
+      </div>
+      <div class="export-row">
+        <button class="btn btn-success btn-sm btn-full" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn btn-ghost btn-sm btn-full" onclick="exportJSON()">{ } JSON</button>
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="sidebar-section" style="flex:1">
+      <div class="section-title">Quick Start</div>
+      <div style="font-size:.76rem;color:var(--text-dim);line-height:1.75">
+        <p>1. Click ⚙️ and enter your <strong style="color:var(--text-muted)">Apify API key</strong>.</p>
+        <p>2. Select a <strong style="color:var(--text-muted)">sector</strong> and optional filters.</p>
+        <p>3. Click <strong style="color:var(--text-muted)">Find Leads</strong> — real Singapore businesses will appear below.</p>
+        <br>
+        <p style="color:var(--text-dim)">Actor used: <code style="font-size:.72rem;background:var(--surface2);padding:1px 5px;border-radius:3px">compass/crawler-google-places</code></p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="content" id="contentArea">
+
+      <!-- EMPTY -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🗺️</div>
+        <h3>Find Singapore business leads</h3>
+        <p>Select a sector and region, then click <strong>Find Leads</strong>. Results include business name, address, phone, website, email, and ratings sourced from Google Maps.</p>
+        <div style="margin-top:4px;font-size:.78rem;color:var(--text-dim)">Try a quick search:</div>
+        <div class="quick-chips">
+          <div class="quick-chip" onclick="quickSearch('Technology & IT','Central')">💻 Tech · Central</div>
+          <div class="quick-chip" onclick="quickSearch('Finance & Banking','')">🏦 Finance</div>
+          <div class="quick-chip" onclick="quickSearch('Healthcare & Medical','')">🏥 Healthcare</div>
+          <div class="quick-chip" onclick="quickSearch('Food & Beverage','East')">🍜 F&amp;B · East</div>
+          <div class="quick-chip" onclick="quickSearch('Logistics & Supply Chain','West')">🚚 Logistics · West</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="openSettings()">⚙️ Configure API Key</button>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-wrap" id="progressState" style="display:none">
+        <div class="steps">
+          <div class="step" id="stp0">
+            <div class="step-dot" id="dot0">1</div>
+            <div class="step-lbl">Starting</div>
+          </div>
+          <div class="step-connector" id="con0"></div>
+          <div class="step" id="stp1">
+            <div class="step-dot" id="dot1">2</div>
+            <div class="step-lbl">Running</div>
+          </div>
+          <div class="step-connector" id="con1"></div>
+          <div class="step" id="stp2">
+            <div class="step-dot" id="dot2">3</div>
+            <div class="step-lbl">Fetching</div>
+          </div>
+          <div class="step-connector" id="con2"></div>
+          <div class="step" id="stp3">
+            <div class="step-dot" id="dot3">4</div>
+            <div class="step-lbl">Done</div>
+          </div>
+        </div>
+        <div class="spinner"></div>
+        <div class="progress-msg" id="pMsg">Starting actor run…</div>
+        <div class="progress-detail" id="pDetail"></div>
+        <button class="btn btn-ghost btn-xs" style="margin-top:6px" onclick="cancelSearch()">Cancel</button>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="resultsState" style="display:none">
+        <div class="results-header">
+          <div class="results-title">
+            Singapore Leads <span class="results-count" id="rCount"></span>
+          </div>
+          <input type="text" class="search-box" id="filterBox" placeholder="🔍 Filter…" oninput="filterTable(this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ CSV</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportJSON()">{ } JSON</button>
+        </div>
+        <div class="table-card">
+          <div class="table-scroll">
+            <table id="leadsTable">
+              <thead id="tHead"></thead>
+              <tbody id="tBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ── SETTINGS MODAL ─────────────────────────────────────────────────────── -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2>⚙️ Settings</h2>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="field">
+        <label>Apify API Key</label>
+        <div class="key-wrap">
+          <input type="password" id="apiKeyIn" placeholder="apify_api_xxxxxxxxxxxx" />
+          <button class="key-eye" onclick="toggleEye()" id="eyeBtn">👁</button>
+        </div>
+        <div class="hint">Get yours at <strong>apify.com → Settings → Integrations</strong>. Stored locally in your browser only.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>Apify Actor ID</label>
+        <input type="text" id="actorIn" placeholder="compass/crawler-google-places" />
+        <div class="hint">Default: <code>compass/crawler-google-places</code> (Google Maps Scraper)</div>
+      </div>
+
+      <div class="field">
+        <label>Extra Actor Options <span style="color:var(--text-dim)">(JSON, merged into every run)</span></label>
+        <textarea id="extraOpts" rows="4" placeholder='{"language":"en","countryCode":"sg"}'></textarea>
+        <div class="hint">Optional. Keys here override the default input.</div>
+      </div>
+
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOASTS ─────────────────────────────────────────────────────────────── -->
+<div class="toasts" id="toastContainer"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+const APIFY   = 'https://api.apify.com/v2';
+const DEF_ACTOR = 'compass/crawler-google-places';
+const LS_SETTINGS = 'sgleadgen_settings';
+const LS_CACHE    = 'sgleadgen_cache';
+const POLL_MS = 4000;
+
+// Google Maps field mapping
+const COLS = [
+  { key:'name',     label:'Business Name', aliases:['title','name'] },
+  { key:'category', label:'Category',      aliases:['categoryName','category'] },
+  { key:'address',  label:'Address',       aliases:['address','formattedAddress','street','vicinity'] },
+  { key:'phone',    label:'Phone',         aliases:['phone','phoneUnformatted','international_phone_number'] },
+  { key:'website',  label:'Website',       aliases:['website','websiteUrl','domain'] },
+  { key:'email',    label:'Email',         aliases:['email','emailAddress'] },
+  { key:'rating',   label:'Rating',        aliases:['rating','totalScore','stars'] },
+  { key:'reviews',  label:'Reviews',       aliases:['reviewsCount','reviewCount','userRatingsTotal','user_ratings_total'] },
+  { key:'maps',     label:'Maps',          aliases:['url','googleMapsUrl','placeUrl'] },
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let allLeads = [], filtered = [], cancelled = false;
+let sortKey = null, sortDir = 'asc';
+let activeCols = [];
+
+// ── SETTINGS ───────────────────────────────────────────────────────────────
+const cfg = () => { try { return JSON.parse(localStorage.getItem(LS_SETTINGS)) || {}; } catch { return {}; } };
+const saveCfg = d => localStorage.setItem(LS_SETTINGS, JSON.stringify(d));
+
+function openSettings() {
+  const s = cfg();
+  document.getElementById('apiKeyIn').value  = s.apiKey  || '';
+  document.getElementById('actorIn').value   = s.actorId || DEF_ACTOR;
+  document.getElementById('extraOpts').value = s.extra   || '';
+  document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+function saveSettings() {
+  const key   = document.getElementById('apiKeyIn').value.trim();
+  const actor = document.getElementById('actorIn').value.trim() || DEF_ACTOR;
+  const extra = document.getElementById('extraOpts').value.trim();
+  if (!key) { toast('API key is required.', 'error'); return; }
+  if (extra) { try { JSON.parse(extra); } catch { toast('Extra options must be valid JSON.', 'error'); return; } }
+  saveCfg({ apiKey: key, actorId: actor, extra });
+  toast('Settings saved.', 'success');
+  closeSettings();
+}
+function toggleEye() {
+  const i = document.getElementById('apiKeyIn');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+document.getElementById('settingsModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSettings(); });
+
+// ── THEME ──────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const curr = document.documentElement.dataset.theme;
+  const next = curr === 'light' ? 'dark' : 'light';
+  applyTheme(next);
+  localStorage.setItem('sgleadgen_theme', next);
+}
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.getElementById('themeBtn').textContent = t === 'light' ? '🌙' : '☀️';
+}
+
+// ── SECTOR TOGGLE ──────────────────────────────────────────────────────────
+function onSectorChange(sel) {
+  const row = document.getElementById('sectorRow');
+  if (sel.value === '__custom__') {
+    row.classList.add('custom');
+    document.getElementById('sectorCustom').focus();
+  } else {
+    row.classList.remove('custom');
+  }
+}
+
+function getSector() {
+  const sel = document.getElementById('sectorSelect');
+  if (sel.value === '__custom__') return document.getElementById('sectorCustom').value.trim();
+  return sel.value;
+}
+
+// ── TAG INPUT ──────────────────────────────────────────────────────────────
+function getTags() {
+  return [...document.querySelectorAll('#tagWrapper .tag')].map(t => t.dataset.v);
+}
+function addTag(v) {
+  v = v.replace(/,/g,'').trim();
+  if (!v || getTags().includes(v)) return;
+  const t = document.createElement('div');
+  t.className = 'tag'; t.dataset.v = v;
+  t.innerHTML = `${esc(v)}<span class="tag-x" onclick="this.parentElement.remove()">×</span>`;
+  document.getElementById('tagWrapper').insertBefore(t, document.getElementById('tagIn'));
+}
+document.getElementById('tagIn').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(e.target.value); e.target.value = ''; }
+  if (e.key === 'Backspace' && !e.target.value) {
+    const tags = document.querySelectorAll('#tagWrapper .tag');
+    if (tags.length) tags[tags.length - 1].remove();
+  }
+});
+document.getElementById('tagIn').addEventListener('blur', e => {
+  if (e.target.value) { addTag(e.target.value); e.target.value = ''; }
+});
+
+// ── QUICK SEARCH ───────────────────────────────────────────────────────────
+function quickSearch(sector, region) {
+  const sel = document.getElementById('sectorSelect');
+  // Try to match an option
+  const opt = [...sel.options].find(o => o.value === sector || o.text === sector);
+  if (opt) { sel.value = opt.value; document.getElementById('sectorRow').classList.remove('custom'); }
+  else { sel.value = '__custom__'; document.getElementById('sectorCustom').value = sector; document.getElementById('sectorRow').classList.add('custom'); }
+  document.getElementById('region').value = region;
+  startSearch();
+}
+
+// ── SEARCH QUERY BUILDER ───────────────────────────────────────────────────
+function buildQueries(sector, tags, targetGroup, region) {
+  const loc   = region ? `${region} Singapore` : 'Singapore';
+  const group = targetGroup ? ` ${targetGroup}` : '';
+  const base  = `${sector}${group} ${loc}`.trim();
+  const queries = [base];
+  tags.forEach(t => {
+    const q = `${sector} ${t} ${loc}`.trim();
+    if (!queries.includes(q)) queries.push(q);
+  });
+  return queries;
+}
+
+// ── SEARCH ─────────────────────────────────────────────────────────────────
+async function startSearch() {
+  const s = cfg();
+  if (!s.apiKey) { openSettings(); toast('Enter your Apify API key first.', 'error'); return; }
+
+  const sector = getSector();
+  const tags   = getTags();
+  const tg     = document.getElementById('targetGroup').value;
+  const region = document.getElementById('region').value;
+  const max    = parseInt(document.getElementById('maxResults').value);
+
+  if (!sector && !tags.length) { toast('Select a sector or add job title keywords.', 'error'); return; }
+
+  const queries = buildQueries(sector || tags[0], tags, tg, region);
+  const actorId = s.actorId || DEF_ACTOR;
+  const extra   = s.extra ? JSON.parse(s.extra) : {};
+
+  const input = {
+    searchStringsArray: queries,
+    maxCrawledPlacesPerSearch: max,
+    language: 'en',
+    countryCode: 'sg',
+    includeHistogram: false,
+    includeOpeningHours: false,
+    includePeopleAlsoSearch: false,
+    ...extra
+  };
+
+  cancelled = false;
+  document.getElementById('searchBtn').disabled = true;
+  showProgress();
+  setStep(0, 'active');
+  setMsg(`Starting run for: ${queries.join(' / ')}`, `Actor: ${actorId}`);
+
+  try {
+    const run = await apiPost(`/acts/${encodeURIComponent(actorId)}/runs`, input, s.apiKey);
+    setStep(0, 'done'); setStep(1, 'active');
+    setMsg('Actor is running…', `Run ID: ${run.id} · Queries: ${queries.length}`);
+    await pollRun(run.id, s.apiKey);
+  } catch (err) {
+    if (!cancelled) { showEmpty(); toast('Error: ' + err.message, 'error'); }
+  } finally {
+    document.getElementById('searchBtn').disabled = false;
+  }
+}
+
+async function pollRun(runId, apiKey) {
+  while (!cancelled) {
+    await sleep(POLL_MS);
+    if (cancelled) return;
+    const run = await apiGet(`/actor-runs/${runId}`, apiKey);
+    setMsg(
+      `Running… status: ${run.status}`,
+      `Run ${runId} · Items so far: ${run.stats?.itemCount ?? '…'}`
+    );
+    if (run.status === 'SUCCEEDED') {
+      setStep(1, 'done'); setStep(2, 'active');
+      setMsg('Fetching results…', `Dataset: ${run.defaultDatasetId}`);
+      const items = await apiGet(`/datasets/${run.defaultDatasetId}/items?limit=2000`, apiKey);
+      setStep(2, 'done'); setStep(3, 'done');
+      renderResults(Array.isArray(items) ? items : []);
+      return;
+    }
+    if (['FAILED','ABORTED','TIMED-OUT'].includes(run.status)) {
+      throw new Error(`Run ended: ${run.status}`);
+    }
+  }
+}
+
+function cancelSearch() {
+  cancelled = true;
+  showEmpty();
+  document.getElementById('searchBtn').disabled = false;
+  toast('Search cancelled.', 'info');
+}
+
+// ── APIFY API ──────────────────────────────────────────────────────────────
+async function apiPost(path, body, key) {
+  const r = await fetch(APIFY + path, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error?.message || `HTTP ${r.status}`);
+  return j.data;
+}
+async function apiGet(path, key) {
+  const r = await fetch(APIFY + path, { headers: { 'Authorization': `Bearer ${key}` } });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error?.message || `HTTP ${r.status}`);
+  return j.data !== undefined ? j.data : j;
+}
+
+// ── NORMALISE ──────────────────────────────────────────────────────────────
+function normalise(item) {
+  const out = { _raw: item };
+  for (const col of COLS) {
+    if (col.key === 'category') {
+      if (item.categoryName) { out.category = item.categoryName; continue; }
+      if (Array.isArray(item.categories) && item.categories.length) {
+        const c = item.categories[0];
+        out.category = typeof c === 'string' ? c : (c?.name || '');
+        continue;
+      }
+      if (item.category) { out.category = String(item.category); continue; }
+      continue;
+    }
+    if (col.key === 'maps') {
+      const u = item.url || item.googleMapsUrl || item.placeUrl || '';
+      out.maps = u;
+      continue;
+    }
+    if (col.key === 'website') {
+      const ws = item.website || item.websiteUrl || item.domain || '';
+      out.website = ws && !ws.includes('google.com/maps') ? ws : '';
+      continue;
+    }
+    if (col.key === 'rating') {
+      const r = item.rating ?? item.totalScore ?? item.stars;
+      out.rating = r != null ? parseFloat(r).toFixed(1) : '';
+      continue;
+    }
+    for (const alias of col.aliases) {
+      const v = item[alias];
+      if (v !== undefined && v !== null && v !== '') {
+        out[col.key] = Array.isArray(v) ? v.join('; ') : String(v);
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function renderResults(items) {
+  allLeads   = items.map(normalise);
+  filtered   = [...allLeads];
+  activeCols = COLS.filter(c => allLeads.some(l => l[c.key]));
+  localStorage.setItem(LS_CACHE, JSON.stringify({ leads: allLeads, ts: Date.now() }));
+  updateStats();
+  buildTable();
+  showResults();
+  toast(`Found ${allLeads.length} lead${allLeads.length !== 1 ? 's' : ''}.`, 'success');
+}
+
+function updateStats() {
+  document.getElementById('sTot').textContent   = allLeads.length;
+  document.getElementById('sPhone').textContent = allLeads.filter(l => l.phone).length;
+  document.getElementById('sEmail').textContent = allLeads.filter(l => l.email).length;
+  document.getElementById('sWeb').textContent   = allLeads.filter(l => l.website).length;
+  document.getElementById('statsPanel').style.display = '';
+  document.getElementById('liveCount').style.display  = '';
+  document.getElementById('liveCount').textContent     = `${allLeads.length} leads`;
+}
+
+function buildTable() {
+  document.getElementById('tHead').innerHTML = `<tr>
+    <th style="width:36px;color:var(--text-dim)">#</th>
+    ${activeCols.map(c => `<th onclick="sortTable('${c.key}')">
+      <div class="th-inner">${c.label}<span class="sort-icon"></span></div>
+    </th>`).join('')}
+  </tr>`;
+  renderRows();
+}
+
+function renderRows() {
+  document.getElementById('rCount').textContent = `(${filtered.length})`;
+  document.getElementById('tBody').innerHTML = filtered.map((l, i) =>
+    `<tr><td style="color:var(--text-dim);font-size:.73rem">${i + 1}</td>${activeCols.map(c => cell(c.key, l[c.key])).join('')}</tr>`
+  ).join('');
+}
+
+function cell(key, val) {
+  if (!val) return `<td><span class="no-data">—</span></td>`;
+  switch (key) {
+    case 'name':    return `<td class="cell-name">${esc(val)}</td>`;
+    case 'address': return `<td class="cell-addr" title="${esc(val)}">${esc(trunc(val,45))}</td>`;
+    case 'phone':   return `<td><a href="tel:${esc(val)}" class="badge badge-blue">📞 ${esc(val)}</a></td>`;
+    case 'email':   return `<td><span class="badge badge-green">✉ ${esc(val)}</span><button class="copy-btn" onclick="copyText('${esc(val)}')" title="Copy">⎘</button></td>`;
+    case 'website': return `<td><a href="${esc(val)}" target="_blank" rel="noopener" title="${esc(val)}">${esc(trunc(val.replace(/^https?:\/\//,''),28))}</a></td>`;
+    case 'rating':  return `<td><span class="badge badge-yellow">★ ${esc(val)}</span></td>`;
+    case 'reviews': return `<td><span class="badge badge-gray">${esc(val)}</span></td>`;
+    case 'maps':    return `<td><a href="${esc(val)}" target="_blank" rel="noopener">📍 View</a></td>`;
+    case 'category':return `<td><span title="${esc(val)}">${esc(trunc(val,28))}</span></td>`;
+    default:        return `<td title="${esc(val)}">${esc(trunc(val,36))}</td>`;
+  }
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortKey = key; sortDir = 'asc'; }
+  document.querySelectorAll('thead th').forEach(th => th.classList.remove('asc','desc'));
+  const idx = activeCols.findIndex(c => c.key === key);
+  if (idx >= 0) document.querySelectorAll('thead th')[idx + 1].classList.add(sortDir);
+  filtered.sort((a, b) => {
+    const va = (a[key] || '').toLowerCase(), vb = (b[key] || '').toLowerCase();
+    return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  renderRows();
+}
+
+function filterTable(q) {
+  q = q.toLowerCase();
+  filtered = allLeads.filter(l =>
+    Object.values(l).some(v => v && typeof v === 'string' && v.toLowerCase().includes(q))
+  );
+  renderRows();
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!filtered.length) { toast('No results to export.', 'error'); return; }
+  const header = activeCols.map(c => c.label).join(',');
+  const rows   = filtered.map(l => activeCols.map(c => `"${(l[c.key]||'').replace(/"/g,'""')}"`).join(','));
+  download([header,...rows].join('\n'), 'sg_leads.csv', 'text/csv');
+  toast(`Exported ${filtered.length} leads as CSV.`, 'success');
+}
+function exportJSON() {
+  if (!filtered.length) { toast('No results to export.', 'error'); return; }
+  const data = filtered.map(l => Object.fromEntries(activeCols.map(c => [c.key, l[c.key]||''])));
+  download(JSON.stringify(data, null, 2), 'sg_leads.json', 'application/json');
+  toast(`Exported ${filtered.length} leads as JSON.`, 'success');
+}
+function download(content, filename, mime) {
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([content], { type: mime })),
+    download: filename
+  });
+  a.click();
+}
+
+// ── UI STATE ───────────────────────────────────────────────────────────────
+function showEmpty() {
+  set('emptyState',''); set('progressState','none'); set('resultsState','none');
+  set('clearBtn','none');
+}
+function showProgress() {
+  set('emptyState','none'); set('progressState',''); set('resultsState','none');
+  set('clearBtn','none');
+  resetSteps();
+}
+function showResults() {
+  set('emptyState','none'); set('progressState','none'); set('resultsState','');
+  set('clearBtn','');
+}
+function clearResults() {
+  allLeads = []; filtered = [];
+  localStorage.removeItem(LS_CACHE);
+  set('statsPanel','none'); set('liveCount','none'); set('clearBtn','none');
+  showEmpty();
+}
+function set(id, v) { document.getElementById(id).style.display = v; }
+
+function setMsg(msg, detail) {
+  document.getElementById('pMsg').textContent    = msg;
+  document.getElementById('pDetail').textContent = detail || '';
+}
+function resetSteps() {
+  [0,1,2,3].forEach(i => {
+    document.getElementById(`dot${i}`).className = 'step-dot';
+    document.getElementById(`stp${i}`).className = 'step';
+  });
+  [0,1,2].forEach(i => document.getElementById(`con${i}`).className = 'step-connector');
+}
+function setStep(i, state) {
+  document.getElementById(`dot${i}`).className = `step-dot ${state}`;
+  document.getElementById(`stp${i}`).className = `step ${state}`;
+  if (state === 'done' && i < 3) document.getElementById(`con${i}`).className = 'step-connector done';
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const tc = document.getElementById('toastContainer');
+  const t  = Object.assign(document.createElement('div'), { className: `toast ${type}`, textContent: msg });
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+const esc   = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const trunc = (s, n) => s.length > n ? s.slice(0, n) + '…' : s;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function copyText(t) { navigator.clipboard.writeText(t).then(() => toast('Copied!', 'success')); }
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+(function init() {
+  // Theme
+  const saved = localStorage.getItem('sgleadgen_theme') || 'dark';
+  applyTheme(saved);
+
+  // Restore cached results
+  try {
+    const c = JSON.parse(localStorage.getItem(LS_CACHE) || 'null');
+    if (c?.leads?.length) {
+      allLeads   = c.leads;
+      filtered   = [...allLeads];
+      activeCols = COLS.filter(col => allLeads.some(l => l[col.key]));
+      updateStats();
+      buildTable();
+      showResults();
+    }
+  } catch {}
+
+  // Pre-fill API key if already set
+  const s = cfg();
+  if (s.apiKey) toast('API key loaded from settings.', 'info');
+})();
+</script>
+</body>
+</html>
